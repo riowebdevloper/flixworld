@@ -16,6 +16,8 @@ const addSchema = z.object({
   rating: z.number().nullable().optional(),
 });
 
+const GENERIC_ERROR = "An error occurred. Please try again.";
+
 export const addToList = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => addSchema.parse(d))
@@ -26,7 +28,10 @@ export const addToList = createServerFn({ method: "POST" })
         { ...data, user_id: context.userId },
         { onConflict: "user_id,list_kind,media_type,media_id" },
       );
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[user-lists] addToList", error);
+      throw new Error(GENERIC_ERROR);
+    }
     return { ok: true };
   });
 
@@ -47,7 +52,10 @@ export const removeFromList = createServerFn({ method: "POST" })
       .eq("list_kind", data.list_kind)
       .eq("media_type", data.media_type)
       .eq("media_id", data.media_id);
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[user-lists] removeFromList", error);
+      throw new Error(GENERIC_ERROR);
+    }
     return { ok: true };
   });
 
@@ -64,7 +72,10 @@ export const getList = createServerFn({ method: "GET" })
       .eq("list_kind", data.list_kind)
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[user-lists] getList", error);
+      throw new Error(GENERIC_ERROR);
+    }
     return rows ?? [];
   });
 
@@ -75,6 +86,9 @@ export const getMyLists = createServerFn({ method: "GET" })
       .from("user_media")
       .select("list_kind, media_type, media_id")
       .eq("user_id", context.userId);
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[user-lists] getMyLists", error);
+      throw new Error(GENERIC_ERROR);
+    }
     return data ?? [];
   });
