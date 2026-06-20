@@ -1,22 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { MovieGrid } from "@/components/movie-grid";
-import { getByCategory } from "@/lib/data";
+import { fetchCategory } from "@/lib/tmdb.functions";
+
+const q = queryOptions({
+  queryKey: ["category", "anime"],
+  queryFn: () => fetchCategory({ data: { kind: "anime", page: 1 } }),
+  staleTime: 1000 * 60 * 30,
+});
 
 export const Route = createFileRoute("/anime")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(q),
   head: () => ({
     meta: [
       { title: "Anime — FlixWorld.fun" },
-      { name: "description", content: "Stream subbed and dubbed anime, from shōnen to seinen." },
+      { name: "description", content: "Watch the best anime series and movies on FlixWorld.fun." },
       { property: "og:title", content: "Anime — FlixWorld.fun" },
       { property: "og:url", content: "/anime" },
     ],
     links: [{ rel: "canonical", href: "/anime" }],
   }),
-  component: () => (
+  component: Page,
+});
+
+function Page() {
+  const { data } = useSuspenseQuery(q);
+  return (
     <div className="pt-6">
       <h1 className="px-4 sm:px-6 lg:px-10 text-display text-4xl sm:text-5xl font-bold text-white">Anime</h1>
-      <p className="px-4 sm:px-6 lg:px-10 mt-2 text-white/60">From shōnen battles to slice-of-life favorites.</p>
-      <MovieGrid movies={getByCategory("anime")} />
+      <p className="px-4 sm:px-6 lg:px-10 mt-2 text-white/60">From Shonen to Seinen — the full anime spectrum.</p>
+      <MovieGrid items={data.results} />
     </div>
-  ),
-});
+  );
+}

@@ -13,12 +13,17 @@ import { Route as WebSeriesRouteImport } from './routes/web-series'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as KDramaRouteImport } from './routes/k-drama'
 import { Route as GenresRouteImport } from './routes/genres'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnimeRouteImport } from './routes/anime'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TvIdRouteImport } from './routes/tv.$id'
 import { Route as MovieIdRouteImport } from './routes/movie.$id'
+import { Route as AuthenticatedMyListRouteImport } from './routes/_authenticated/my-list'
 
 const WebSeriesRoute = WebSeriesRouteImport.update({
   id: '/web-series',
@@ -40,6 +45,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MoviesRoute = MoviesRouteImport.update({
   id: '/movies',
   path: '/movies',
@@ -55,9 +65,18 @@ const GenresRoute = GenresRouteImport.update({
   path: '/genres',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnimeRoute = AnimeRouteImport.update({
   id: '/anime',
   path: '/anime',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -65,99 +84,139 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TvIdRoute = TvIdRouteImport.update({
+  id: '/tv/$id',
+  path: '/tv/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MovieIdRoute = MovieIdRouteImport.update({
   id: '/movie/$id',
   path: '/movie/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedMyListRoute = AuthenticatedMyListRouteImport.update({
+  id: '/my-list',
+  path: '/my-list',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
+  '/auth': typeof AuthRoute
   '/genres': typeof GenresRoute
   '/k-drama': typeof KDramaRoute
   '/movies': typeof MoviesRoute
+  '/premium': typeof PremiumRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trending': typeof TrendingRoute
   '/web-series': typeof WebSeriesRoute
+  '/my-list': typeof AuthenticatedMyListRoute
   '/movie/$id': typeof MovieIdRoute
+  '/tv/$id': typeof TvIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
+  '/auth': typeof AuthRoute
   '/genres': typeof GenresRoute
   '/k-drama': typeof KDramaRoute
   '/movies': typeof MoviesRoute
+  '/premium': typeof PremiumRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trending': typeof TrendingRoute
   '/web-series': typeof WebSeriesRoute
+  '/my-list': typeof AuthenticatedMyListRoute
   '/movie/$id': typeof MovieIdRoute
+  '/tv/$id': typeof TvIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/anime': typeof AnimeRoute
+  '/auth': typeof AuthRoute
   '/genres': typeof GenresRoute
   '/k-drama': typeof KDramaRoute
   '/movies': typeof MoviesRoute
+  '/premium': typeof PremiumRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trending': typeof TrendingRoute
   '/web-series': typeof WebSeriesRoute
+  '/_authenticated/my-list': typeof AuthenticatedMyListRoute
   '/movie/$id': typeof MovieIdRoute
+  '/tv/$id': typeof TvIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/anime'
+    | '/auth'
     | '/genres'
     | '/k-drama'
     | '/movies'
+    | '/premium'
     | '/search'
     | '/sitemap.xml'
     | '/trending'
     | '/web-series'
+    | '/my-list'
     | '/movie/$id'
+    | '/tv/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/anime'
+    | '/auth'
     | '/genres'
     | '/k-drama'
     | '/movies'
+    | '/premium'
     | '/search'
     | '/sitemap.xml'
     | '/trending'
     | '/web-series'
+    | '/my-list'
     | '/movie/$id'
+    | '/tv/$id'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/anime'
+    | '/auth'
     | '/genres'
     | '/k-drama'
     | '/movies'
+    | '/premium'
     | '/search'
     | '/sitemap.xml'
     | '/trending'
     | '/web-series'
+    | '/_authenticated/my-list'
     | '/movie/$id'
+    | '/tv/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AnimeRoute: typeof AnimeRoute
+  AuthRoute: typeof AuthRoute
   GenresRoute: typeof GenresRoute
   KDramaRoute: typeof KDramaRoute
   MoviesRoute: typeof MoviesRoute
+  PremiumRoute: typeof PremiumRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrendingRoute: typeof TrendingRoute
   WebSeriesRoute: typeof WebSeriesRoute
   MovieIdRoute: typeof MovieIdRoute
+  TvIdRoute: typeof TvIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -190,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movies': {
       id: '/movies'
       path: '/movies'
@@ -211,11 +277,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GenresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/anime': {
       id: '/anime'
       path: '/anime'
       fullPath: '/anime'
       preLoaderRoute: typeof AnimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -225,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tv/$id': {
+      id: '/tv/$id'
+      path: '/tv/$id'
+      fullPath: '/tv/$id'
+      preLoaderRoute: typeof TvIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movie/$id': {
       id: '/movie/$id'
       path: '/movie/$id'
@@ -232,20 +319,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MovieIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/my-list': {
+      id: '/_authenticated/my-list'
+      path: '/my-list'
+      fullPath: '/my-list'
+      preLoaderRoute: typeof AuthenticatedMyListRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMyListRoute: typeof AuthenticatedMyListRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMyListRoute: AuthenticatedMyListRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AnimeRoute: AnimeRoute,
+  AuthRoute: AuthRoute,
   GenresRoute: GenresRoute,
   KDramaRoute: KDramaRoute,
   MoviesRoute: MoviesRoute,
+  PremiumRoute: PremiumRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrendingRoute: TrendingRoute,
   WebSeriesRoute: WebSeriesRoute,
   MovieIdRoute: MovieIdRoute,
+  TvIdRoute: TvIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

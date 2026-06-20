@@ -9,12 +9,12 @@ import { AdSlot } from "@/components/ad-slot";
 
 const detailQ = (id: number) =>
   queryOptions({
-    queryKey: ["detail", "movie", id],
-    queryFn: () => fetchDetail({ data: { type: "movie", id } }),
+    queryKey: ["detail", "tv", id],
+    queryFn: () => fetchDetail({ data: { type: "tv", id } }),
     staleTime: 1000 * 60 * 60,
   });
 
-export const Route = createFileRoute("/movie/$id")({
+export const Route = createFileRoute("/tv/$id")({
   loader: async ({ params, context }) => {
     const id = Number(params.id);
     if (!Number.isFinite(id)) throw notFound();
@@ -25,13 +25,13 @@ export const Route = createFileRoute("/movie/$id")({
     const id = loaderData?.id ?? Number(params.id);
     return {
       meta: [
-        { title: `Movie — FlixWorld.fun` },
-        { property: "og:url", content: `/movie/${id}` },
+        { title: "Series — FlixWorld.fun" },
+        { property: "og:url", content: `/tv/${id}` },
       ],
-      links: [{ rel: "canonical", href: `/movie/${id}` }],
+      links: [{ rel: "canonical", href: `/tv/${id}` }],
     };
   },
-  component: MoviePage,
+  component: TvPage,
   notFoundComponent: () => <div className="pt-24 text-center text-white/70">Title not found.</div>,
   errorComponent: ({ error, reset }) => (
     <div className="pt-24 text-center text-white/70">
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/movie/$id")({
   ),
 });
 
-function MoviePage() {
+function TvPage() {
   const { id } = Route.useLoaderData();
   const { data: m } = useSuspenseQuery(detailQ(id));
   const trailer = officialTrailer(m.videos);
@@ -68,8 +68,9 @@ function MoviePage() {
             <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-white/80">
               <span className="flex items-center gap-1"><Star className="h-4 w-4 fill-gold text-gold" />{m.vote_average.toFixed(1)} / 10</span>
               {yr && <span>{yr}</span>}
-              {m.runtime ? <span>{Math.floor(m.runtime / 60)}h {m.runtime % 60}m</span> : null}
-              <span className="rounded bg-primary px-2 py-0.5 text-xs font-bold text-white uppercase">Movie</span>
+              {m.number_of_seasons ? <span>{m.number_of_seasons} Season{m.number_of_seasons > 1 ? "s" : ""}</span> : null}
+              {m.number_of_episodes ? <span>{m.number_of_episodes} Episodes</span> : null}
+              <span className="rounded bg-primary px-2 py-0.5 text-xs font-bold text-white uppercase">Series</span>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {m.genres.map((g) => (

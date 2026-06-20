@@ -1,22 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { MovieGrid } from "@/components/movie-grid";
-import { getByCategory } from "@/lib/data";
+import { fetchCategory } from "@/lib/tmdb.functions";
+
+const q = queryOptions({
+  queryKey: ["category", "kdrama"],
+  queryFn: () => fetchCategory({ data: { kind: "kdrama", page: 1 } }),
+  staleTime: 1000 * 60 * 30,
+});
 
 export const Route = createFileRoute("/k-drama")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(q),
   head: () => ({
     meta: [
       { title: "K-Drama — FlixWorld.fun" },
-      { name: "description", content: "The best Korean dramas streaming in HD & 4K." },
+      { name: "description", content: "The best Korean dramas streaming on FlixWorld.fun." },
       { property: "og:title", content: "K-Drama — FlixWorld.fun" },
       { property: "og:url", content: "/k-drama" },
     ],
     links: [{ rel: "canonical", href: "/k-drama" }],
   }),
-  component: () => (
+  component: Page,
+});
+
+function Page() {
+  const { data } = useSuspenseQuery(q);
+  return (
     <div className="pt-6">
       <h1 className="px-4 sm:px-6 lg:px-10 text-display text-4xl sm:text-5xl font-bold text-white">K-Drama</h1>
-      <p className="px-4 sm:px-6 lg:px-10 mt-2 text-white/60">Hand-picked Korean drama for every mood.</p>
-      <MovieGrid movies={getByCategory("kdrama")} />
+      <p className="px-4 sm:px-6 lg:px-10 mt-2 text-white/60">Romance, thrillers and prestige drama from Korea.</p>
+      <MovieGrid items={data.results} />
     </div>
-  ),
-});
+  );
+}
