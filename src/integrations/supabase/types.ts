@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_media: {
+        Row: {
+          backdrop_path: string | null
+          created_at: string
+          id: string
+          list_kind: Database["public"]["Enums"]["list_kind"]
+          media_id: number
+          media_type: Database["public"]["Enums"]["media_kind"]
+          poster_path: string | null
+          rating: number | null
+          release_year: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          backdrop_path?: string | null
+          created_at?: string
+          id?: string
+          list_kind: Database["public"]["Enums"]["list_kind"]
+          media_id: number
+          media_type: Database["public"]["Enums"]["media_kind"]
+          poster_path?: string | null
+          rating?: number | null
+          release_year?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          backdrop_path?: string | null
+          created_at?: string
+          id?: string
+          list_kind?: Database["public"]["Enums"]["list_kind"]
+          media_id?: number
+          media_type?: Database["public"]["Enums"]["media_kind"]
+          poster_path?: string | null
+          rating?: number | null
+          release_year?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +88,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      list_kind: "watchlist" | "favorite" | "recent"
+      media_kind: "movie" | "tv"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +216,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      list_kind: ["watchlist", "favorite", "recent"],
+      media_kind: ["movie", "tv"],
+    },
   },
 } as const
