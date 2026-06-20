@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { useMemo, useState } from "react";
-import { Search as SearchIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Search as SearchIcon, Loader2 } from "lucide-react";
 import { MovieGrid } from "@/components/movie-grid";
-import { movies, allGenres, allLanguages, allYears } from "@/lib/data";
+import { searchMedia, discoverMedia } from "@/lib/tmdb.functions";
+import { MOVIE_GENRES, LANGUAGES } from "@/lib/tmdb";
 
 const searchSchema = z.object({
   q: z.string().optional().default(""),
@@ -32,20 +34,42 @@ function SearchPage() {
   const navigate = Route.useNavigate();
   const [q, setQ] = useState(sp.q);
 
+  // Debounce URL update for q
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (q !== sp.q) navigate({ search: (p: typeof sp) => ({ ...p, q }) });
+    }, 350);
+    return () => clearTimeout(t);
+  }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const hasQuery = sp.q.trim().length > 0;
+
+  const query = useQuery({
+    queryKey: ["search", sp],
+    queryFn: () =>
+      hasQuery
+        ? searchMedia({ data: { q: sp.q, year: sp.year || undefined } })
+        : discoverMedia({
+            data: {
+              type: "movie",
+              genre: sp.genre || undefined,
+              year: sp.year || undefined,
+              language: sp.language || undefined,
+              rating: sp.rating || undefined,
+            },
+          }),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Client-side filter when q is set (TMDB search ignores genre/lang/rating)
+  const results = (query.data?.results ?? []).filter((m) => {
+    if (sp.rating && m.vote_average < parseFloat(sp.rating)) return false;
+    if (sp.language && m.original_language !== sp.language) return false;
+    return true;
+  });
+
   const update = (patch: Partial<typeof sp>) =>
     navigate({ search: (prev: typeof sp) => ({ ...prev, ...patch }) });
-
-  const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    return movies.filter((m) => {
-      if (query && !m.title.toLowerCase().includes(query)) return false;
-      if (sp.genre && !m.genres.includes(sp.genre)) return false;
-      if (sp.year && m.year !== parseInt(sp.year, 10)) return false;
-      if (sp.rating && m.rating < parseFloat(sp.rating)) return false;
-      if (sp.language && m.language !== sp.language) return false;
-      return true;
-    });
-  }, [q, sp.genre, sp.year, sp.rating, sp.language]);
 
   return (
     <div className="pt-6">
@@ -55,17 +79,21 @@ function SearchPage() {
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
           <input
             value={q}
-            onChange={(e) => { setQ(e.target.value); update({ q: e.target.value }); }}
+            onChange={(e) => setQ(e.target.value)}
             placeholder="Search for movies, series, anime..."
             className="w-full glass rounded-full pl-12 pr-4 py-3 text-base text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-primary"
             autoFocus
           />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Select label="Genre" value={sp.genre} onChange={(v) => update({ genre: v })} options={allGenres} />
-          <Select label="Year" value={sp.year} onChange={(v) => update({ year: v })} options={allYears.map(String)} />
-          <Select label="Min Rating" value={sp.rating} onChange={(v) => update({ rating: v })} options={["7", "8", "8.5", "9"]} />
-          <Select label="Language" value={sp.language} onChange={(v) => update({ language: v })} options={allLanguages} />
+          <Select label="Genre" value={sp.genre} onChange={(v) => update({ genre: v })}
+            options={MOVIE_GENRES.map((g) => ({ value: String(g.id), label: g.name }))} />
+          <Select label="Year" value={sp.year} onChange={(v) => update({ year: v })}
+            options={yearOptions()} />
+          <Select label="Min Rating" value={sp.rating} onChange={(v) => update({ rating: v })}
+            options={["7", "7.5", "8", "8.5", "9"].map((r) => ({ value: r, label: r }))} />
+          <Select label="Language" value={sp.language} onChange={(v) => update({ language: v })}
+            options={LANGUAGES.map((l) => ({ value: l.code, label: l.label }))} />
           {(sp.genre || sp.year || sp.rating || sp.language) && (
             <button
               onClick={() => update({ genre: "", year: "", rating: "", language: "" })}
@@ -73,14 +101,27 @@ function SearchPage() {
             >Clear filters</button>
           )}
         </div>
-        <p className="mt-4 text-sm text-white/60">{filtered.length} result{filtered.length === 1 ? "" : "s"}</p>
+        <p className="mt-4 text-sm text-white/60 flex items-center gap-2">
+          {query.isFetching && <Loader2 className="h-3 w-3 animate-spin" />}
+          {results.length} result{results.length === 1 ? "" : "s"}
+        </p>
       </div>
-      <MovieGrid movies={filtered} />
+      <MovieGrid items={results} empty={hasQuery ? "No matches. Try different keywords." : "Pick a filter or type a query."} />
     </div>
   );
 }
 
-function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+function yearOptions() {
+  const now = new Date().getFullYear();
+  const ys: { value: string; label: string }[] = [];
+  for (let y = now; y >= 1970; y--) ys.push({ value: String(y), label: String(y) });
+  return ys;
+}
+
+function Select({ label, value, onChange, options }: {
+  label: string; value: string; onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
   return (
     <select
       value={value}
@@ -89,7 +130,7 @@ function Select({ label, value, onChange, options }: { label: string; value: str
     >
       <option value="" className="bg-card">{label}: All</option>
       {options.map((o) => (
-        <option key={o} value={o} className="bg-card">{label}: {o}</option>
+        <option key={o.value} value={o.value} className="bg-card">{label}: {o.label}</option>
       ))}
     </select>
   );

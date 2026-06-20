@@ -1,22 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { MovieGrid } from "@/components/movie-grid";
-import { getByCategory } from "@/lib/data";
+import { fetchCategory } from "@/lib/tmdb.functions";
+
+const q = queryOptions({
+  queryKey: ["category", "web_series"],
+  queryFn: () => fetchCategory({ data: { kind: "web_series", page: 1 } }),
+  staleTime: 1000 * 60 * 30,
+});
 
 export const Route = createFileRoute("/web-series")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(q),
   head: () => ({
     meta: [
       { title: "Web Series — FlixWorld.fun" },
-      { name: "description", content: "Stream popular web series across every genre on FlixWorld.fun." },
+      { name: "description", content: "Discover popular web series and binge-worthy TV shows on FlixWorld.fun." },
       { property: "og:title", content: "Web Series — FlixWorld.fun" },
       { property: "og:url", content: "/web-series" },
     ],
     links: [{ rel: "canonical", href: "/web-series" }],
   }),
-  component: () => (
+  component: Page,
+});
+
+function Page() {
+  const { data } = useSuspenseQuery(q);
+  return (
     <div className="pt-6">
       <h1 className="px-4 sm:px-6 lg:px-10 text-display text-4xl sm:text-5xl font-bold text-white">Web Series</h1>
-      <p className="px-4 sm:px-6 lg:px-10 mt-2 text-white/60">Binge the most-talked-about series.</p>
-      <MovieGrid movies={getByCategory("series")} />
+      <p className="px-4 sm:px-6 lg:px-10 mt-2 text-white/60">Binge the next obsession.</p>
+      <MovieGrid items={data.results} />
     </div>
-  ),
-});
+  );
+}
