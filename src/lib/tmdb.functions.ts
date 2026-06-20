@@ -7,12 +7,18 @@ const BASE = "https://api.themoviedb.org/3";
 async function tmdb<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
   const key = process.env.TMDB_API_KEY;
   if (!key) throw new Error("TMDB_API_KEY not configured");
+  const isV4Token = key.startsWith("eyJ"); // v4 Read Access Token (JWT)
   const url = new URL(BASE + path);
-  url.searchParams.set("api_key", key);
   url.searchParams.set("language", "en-US");
+  if (!isV4Token) url.searchParams.set("api_key", key);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
-  const res = await fetch(url.toString(), { headers: { accept: "application/json" } });
-  if (!res.ok) throw new Error(`TMDB ${path} → ${res.status}`);
+  const headers: Record<string, string> = { accept: "application/json" };
+  if (isV4Token) headers.authorization = `Bearer ${key}`;
+  const res = await fetch(url.toString(), { headers });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`TMDB ${path} → ${res.status}${body ? `: ${body.slice(0, 160)}` : ""}`);
+  }
   return (await res.json()) as T;
 }
 
