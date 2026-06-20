@@ -52,7 +52,10 @@ export const removeFromList = createServerFn({ method: "POST" })
       .eq("list_kind", data.list_kind)
       .eq("media_type", data.media_type)
       .eq("media_id", data.media_id);
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[user-lists] removeFromList", error);
+      throw new Error(GENERIC_ERROR);
+    }
     return { ok: true };
   });
 
