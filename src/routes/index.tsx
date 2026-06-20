@@ -1,29 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Hero } from "@/components/hero";
+import { Row } from "@/components/row";
+import {
+  latestMovies, trending, getByCategory, topRated, recentlyAdded,
+} from "@/lib/data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "FlixWorld.fun — Stream Movies, Web Series, Anime & K-Drama" },
+      { name: "description", content: "Watch the latest movies, trending web series, anime and K-drama in HD and 4K on FlixWorld.fun." },
+      { property: "og:title", content: "FlixWorld.fun — Stream Everything Entertainment" },
+      { property: "og:description", content: "Movies, web series, anime, K-drama. All in one premium player." },
+      { property: "og:url", content: "/" },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <>
+      <Hero />
+      <Row title="Latest Movies" movies={latestMovies} accent />
+      <Row title="Trending Now" movies={trending} />
+      <Row title="Popular Web Series" movies={getByCategory("series")} />
+      <Row title="Anime Spotlight" movies={getByCategory("anime")} />
+      <Row title="K-Drama Picks" movies={getByCategory("kdrama")} />
+      <Row title="Top Rated" movies={topRated} />
+      <Row title="Recently Added" movies={recentlyAdded} />
+    </>
   );
 }
